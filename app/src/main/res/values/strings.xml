@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">ComposeStepSlider</string>
+    <string name="x_labels">X labels size</string>
+    <string name="track_color_active">Active track color</string>
+    <string name="track_color">Basic track color</string>
+    <string name="text_color_active">Active text color</string>
+    <string name="text_color">Basic text color</string>
+    <string name="pointer_color">Pointer color</string>
+    <string name="text_Size">Text size</string>
+    <string name="bar_height">Bar height</string>
+    <string name="text_top_margin">Distance between bars and text</string>
+    <string name="is_vibrate">Enable vibration when value changes</string>
+    <string name="show_pointer">Show pointer</string>
+    <string name="show_text">Show X labels</string>
+</resources>
