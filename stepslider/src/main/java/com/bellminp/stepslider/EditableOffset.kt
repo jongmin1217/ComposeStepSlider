@@ -8,6 +8,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 
+
 class EditableOffset(private val initialOffset: Animatable<Float, AnimationVector1D>) {
     var offset by mutableStateOf(initialOffset)
 

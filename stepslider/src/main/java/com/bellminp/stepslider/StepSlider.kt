@@ -2,13 +2,10 @@ package com.bellminp.stepslider
 
 
 import android.content.Context
-import android.graphics.Paint
-import android.graphics.Typeface
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import android.util.Log
 import android.util.TypedValue
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.Animatable
@@ -17,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -25,107 +21,81 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import kotlinx.coroutines.launch
-import java.lang.IndexOutOfBoundsException
-import kotlin.math.floor
-import kotlin.math.log
+import kotlin.math.max
 import kotlin.math.round
 
 @Composable
 fun StepSlider(
     modifier: Modifier = Modifier,
     value: Int,
-    xLabels: List<String> = List(5) { "$it" },
-    activeTrackColor: Color = Color.Red,
-    inactiveTrackColor: Color = Color.LightGray,
-    activeTextColor: Color = Color.Red,
-    inactiveTextColor: Color = Color.Black,
-    pointerColor: Color = Color.White,
-    textSize: Dp = 13.dp,
+    xLabels: List<String> = List(5){"$it"},
+    color: StepSliderColor,
+    textStyle: StepSliderTextStyle,
+    enabled: Boolean,
+    tickSize: Dp = 7.dp,
     barHeight: Dp = 8.dp,
     textTopMargin: Dp = 5.dp,
     markerContent: (@Composable () -> Unit) = { DefaultMarker() },
-    textFontFamily: FontFamily? = null,
-    textFontWeight: FontWeight? = null,
     isVibrate: Boolean = true,
-    showPointer: Boolean = true,
+    showTick: Boolean = true,
     showText: Boolean = true,
     onValueChange: ((Int) -> Unit),
     onDetailValueChange: ((Float) -> Unit)? = null,
 ) {
 
-
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
-    val density = LocalDensity.current
-
     val scope = rememberCoroutineScope()
-    var markerSize by remember { mutableStateOf(Size(0f, 0f)) }
+
+    var markerWidth by remember { mutableIntStateOf(0) }
+    var markerHeight by remember { mutableIntStateOf(0) }
+
     var screenWidth by remember { mutableFloatStateOf(configuration.screenWidthDp.dpToPixel(context)) }
     var endOffset by remember {
         mutableFloatStateOf(
-            screenWidth - markerSize.width.toInt().dpToPixel(context)
+            screenWidth - markerWidth.dpToPixel(context)
         )
     }
 
-    var currentStep by rememberSaveable { mutableIntStateOf(value) }
-    val offsetX = rememberSaveable(saver = EditableOffset.Saver) {
-        EditableOffset(Animatable(endOffset / (xLabels.size - 1) * currentStep))
-    }
-
-    var halfWidth by remember { mutableIntStateOf(0) }
-    var halfHeight by remember { mutableIntStateOf(0) }
+    val offsetX = remember { Animatable(endOffset / (xLabels.size - 1) * value) }
 
     val textMeasurerList = List(xLabels.size) { rememberTextMeasurer() }
 
-    var stepSize by remember { mutableIntStateOf(xLabels.size) }
+    var textHeight by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(xLabels) {
-        stepSize = xLabels.size
-        offsetX.offset.animateTo(
-            calculateNewOffset(
-                offsetX.offset.value,
-                xLabels.size,
-                endOffset
-            )
-        )
-    }
+    val xLabelSize by rememberUpdatedState(newValue = xLabels.size - 1)
+    val dragEnable by rememberUpdatedState(newValue = enabled)
 
-    LaunchedEffect(markerSize) {
-        halfWidth = (markerSize.width.toInt() / 2)
-        halfHeight = (markerSize.height.toInt() / 2)
+
+    LaunchedEffect(xLabelSize) {
+        offsetX.snapTo(endOffset / xLabelSize * value)
+        if (value > xLabelSize) {
+            onValueChange(xLabelSize)
+        }
     }
 
 
@@ -133,18 +103,17 @@ fun StepSlider(
         screenWidth,
         endOffset
     ) {
-        offsetX.offset.snapTo(endOffset / (xLabels.size - 1) * currentStep)
+        offsetX.snapTo(endOffset / (xLabels.size - 1) * value)
     }
 
-    LaunchedEffect(offsetX.offset.value) {
+    LaunchedEffect(offsetX.value) {
         val interval = endOffset / (xLabels.size - 1)
-        val detailValue = offsetX.offset.value / interval
+        val detailValue = offsetX.value / interval
         onDetailValueChange?.invoke(detailValue)
 
-        if (currentStep != round(detailValue).toInt()) {
-            currentStep = round(detailValue).toInt()
+        if (value != round(detailValue).toInt()) {
             if (isVibrate) vibrator(context)
-            onValueChange(currentStep)
+            onValueChange(round(detailValue).toInt())
         }
     }
 
@@ -153,23 +122,23 @@ fun StepSlider(
             Modifier
                 .pointerInput(Unit) {
                     detectTapGestures {
-                        scope.launch {
-                            offsetX.offset.animateTo(
-                                calculateNewOffset(
-                                    it.x - halfWidth.dpToPixel(context),
-                                    stepSize,
-                                    endOffset
+                        if(dragEnable){
+                            scope.launch {
+                                offsetX.animateTo(
+                                    calculateNewOffset(
+                                        it.x - (markerWidth / 2).dpToPixel(context),
+                                        xLabelSize,
+                                        endOffset
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
                 .onGloballyPositioned {
                     screenWidth = it.size.width.toFloat()
-                    endOffset = it.size.width.toFloat() - markerSize.width
-                        .toInt()
-                        .dpToPixel(context)
-                    offsetX.offset.updateBounds(0f, endOffset)
+                    endOffset = it.size.width.toFloat() - markerWidth.dpToPixel(context)
+                    offsetX.updateBounds(0f, endOffset)
                 }
                 .background(Color.Transparent)
         )
@@ -177,106 +146,141 @@ fun StepSlider(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height((markerSize.height + (if (showText) textSize.value + textTopMargin.value else 0f) + 3).dp)
-                .padding(horizontal = halfWidth.dp)
+                .height(
+                    (max(
+                        markerHeight,
+                        barHeight.value.toInt()
+                    ) + (if (showText) textHeight
+                        .toFloat()
+                        .pixelToDp(context) + textTopMargin.value else 0f)).dp
+                )
+                .padding(horizontal = (markerWidth / 2).dp)
                 .align(Alignment.TopCenter)
                 .background(Color.Transparent)
         ) {
 
-            drawLine(
-                color = inactiveTrackColor,
-                start = Offset(0f, halfHeight.dp.toPx()),
-                end = Offset(size.width, halfHeight.dp.toPx()),
-                strokeWidth = barHeight.toPx(),
-                cap = StrokeCap.Round
+            drawSliderList(
+                colorOrBrush = color.trackColor(
+                    enabled = enabled,
+                    active = false
+                ),
+                start = Offset(0f, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                end = Offset(size.width, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                strokeWidth = barHeight.toPx()
             )
 
-            drawLine(
-                color = activeTrackColor,
-                start = Offset(0f, halfHeight.dp.toPx()),
-                end = Offset(offsetX.offset.value, halfHeight.dp.toPx()),
-                strokeWidth = barHeight.toPx(),
-                cap = StrokeCap.Round
+            drawSliderList(
+                colorOrBrush = color.trackColor(
+                    enabled = enabled,
+                    active = true
+                ),
+                start = Offset(0f, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                end = Offset(offsetX.value, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                strokeWidth = barHeight.toPx()
             )
 
-            if (showPointer || showText) {
+            if (showTick) {
                 for (i in xLabels.indices) {
+                    val start = Offset(
+                        ((size.width / (xLabels.size - 1)) * i),
+                        max((markerHeight / 2).dp, barHeight / 2).toPx()
+                    )
 
+                    val end = Offset(
+                        ((size.width / (xLabels.size - 1)) * i),
+                        max((markerHeight / 2).dp, barHeight / 2).toPx()
+                    )
 
-                    if (showPointer) {
-                        drawLine(
-                            color = pointerColor,
-                            start = Offset(
-                                ((size.width / (xLabels.size - 1)) * i),
-                                halfHeight.dp.toPx()
-                            ),
-                            end = Offset(
-                                ((size.width / (xLabels.size - 1)) * i),
-                                halfHeight.dp.toPx()
-                            ),
-                            strokeWidth = (barHeight - 1.dp).toPx(),
-                            cap = StrokeCap.Round
+                    val strokeWidth = tickSize.toPx()
+
+                    drawSliderList(
+                        colorOrBrush = color.tickColor(
+                            enabled = enabled,
+                            active = value >= i
+                        ),
+                        start = start,
+                        end = end,
+                        strokeWidth = strokeWidth
+                    )
+                }
+            }
+
+            if (showText) {
+                for (i in xLabels.indices) {
+                    try {
+                        val textLayoutResult = textMeasurerList[i].measure(
+                            xLabels[i],
+                            textStyle.textStyle(
+                                enabled = enabled,
+                                active = value == i
+                            )
                         )
-                    }
 
-                    if (showText) {
-                        try {
-                            val style = TextStyle(
-                                fontSize = textSize.toSp(),
-                                color = if (currentStep == i) activeTextColor else inactiveTextColor,
-                                fontFamily = textFontFamily,
-                                fontWeight = textFontWeight
+                        if (textHeight < textLayoutResult.size.height) textHeight =
+                            textLayoutResult.size.height
+
+                        drawText(
+                            textLayoutResult = textLayoutResult,
+                            topLeft = Offset(
+                                ((size.width / (xLabels.size - 1)) * i) - (textLayoutResult.size.width / 2),
+                                ((max(
+                                    markerHeight,
+                                    barHeight.value.toInt()
+                                ) + textTopMargin.value).toInt().dpToPixel(context))
                             )
-                            val textLayoutResult = textMeasurerList[i].measure(
-                                xLabels[i], style
-                            )
-                            drawText(
-                                textLayoutResult = textLayoutResult,
-                                topLeft = Offset(
-                                    ((size.width / (xLabels.size - 1)) * i) - (textLayoutResult.size.width / 2),
-                                    ((markerSize.height + textTopMargin.value).toInt()
-                                        .dpToPixel(context))
-                                )
-                            )
-                        } catch (_: IllegalArgumentException) {
-                        }
+                        )
+                    } catch (_: IllegalArgumentException) {
                     }
                 }
             }
         }
 
         Box(modifier = Modifier
-            .offset { IntOffset(offsetX.offset.value.toInt(), 0) }
+            .offset {
+                IntOffset(
+                    offsetX.value.toInt(),
+                    if (barHeight.value > markerHeight) {
+                        ((barHeight.value / 2) - (markerHeight / 2)).dp
+                            .toPx()
+                            .toInt()
+                    } else 0
+                )
+            }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { _, dragAmount ->
-                        scope.launch {
-                            offsetX.offset.snapTo(offsetX.offset.value + dragAmount.x)
+                        if(dragEnable){
+                            scope.launch {
+                                offsetX.snapTo(offsetX.value + dragAmount.x)
+                            }
                         }
+
                     },
                     onDragEnd = {
-                        Log.d("qweqwe", "????????${xLabels.size}")
-                        scope.launch {
-                            offsetX.offset.animateTo(
-                                calculateNewOffset(
-                                    offsetX.offset.value,
-                                    stepSize,
-                                    endOffset
+                        if(dragEnable){
+                            scope.launch {
+                                offsetX.animateTo(
+                                    calculateNewOffset(
+                                        offsetX.value,
+                                        xLabelSize,
+                                        endOffset
+                                    )
                                 )
-                            )
+                            }
                         }
+
                     }
                 )
             }
             .onGloballyPositioned {
-                markerSize = Size(
-                    it.size.width
-                        .toFloat()
-                        .pixelToDp(context),
-                    it.size.height
-                        .toFloat()
-                        .pixelToDp(context)
-                )
+                markerWidth = it.size.width
+                    .toFloat()
+                    .pixelToDp(context)
+                    .toInt()
+                markerHeight = it.size.height
+                    .toFloat()
+                    .pixelToDp(context)
+                    .toInt()
             }
         ) {
             markerContent()
@@ -289,7 +293,7 @@ fun calculateNewOffset(
     size: Int,
     endOffset: Float,
 ): Float {
-    val cnt = (size - 1) * 2
+    val cnt = size * 2
     val interval = endOffset / cnt
     for (i in 0 until cnt) {
         val start = (interval * i)
@@ -304,6 +308,34 @@ fun calculateNewOffset(
     return 0f
 }
 
+fun DrawScope.drawSliderList(
+    colorOrBrush: ColorOrBrush,
+    start: Offset,
+    end: Offset,
+    strokeWidth: Float,
+) {
+    when (colorOrBrush) {
+        is ColorOrBrush.SingleColor -> {
+            drawLine(
+                color = colorOrBrush.color,
+                start = start,
+                end = end,
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+        }
+
+        is ColorOrBrush.GradientBrush -> {
+            drawLine(
+                brush = colorOrBrush.brush,
+                start = start,
+                end = end,
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+        }
+    }
+}
 
 @Composable
 fun DefaultMarker() {
@@ -321,8 +353,8 @@ fun Int.dpToPixel(context: Context): Float = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
 )
 
-
 fun Float.pixelToDp(context: Context) = this / (context.resources.displayMetrics.densityDpi / 160f)
+
 
 fun vibrator(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -337,8 +369,3 @@ fun vibrator(context: Context) {
         vibrator.vibrate(10)
     }
 }
-
-val Dp.textSp: TextUnit
-    @Composable get() = with(LocalDensity.current) {
-        this@textSp.toSp()
-    }

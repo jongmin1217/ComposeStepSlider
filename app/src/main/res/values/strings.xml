@@ -1,15 +1,28 @@
 <resources>
     <string name="app_name">ComposeStepSlider</string>
     <string name="x_labels">X labels size</string>
-    <string name="track_color_active">Active track color</string>
-    <string name="track_color">Basic track color</string>
-    <string name="text_color_active">Active text color</string>
-    <string name="text_color">Basic text color</string>
-    <string name="pointer_color">Pointer color</string>
+    <string name="active_track_color">Active track color</string>
+    <string name="inactive_track_color">Inactive track color</string>
+    <string name="active_text_color">Active text color</string>
+    <string name="inactive_text_color">Inactive text color</string>
+    <string name="active_tick_color">Active tick color</string>
+    <string name="inactive_tick_color">Inactive tick color</string>
+    <string name="disable_active_track_color">Disable active track color</string>
+    <string name="disable_inactive_track_color">Disable inactive track color</string>
+    <string name="disable_active_text_color">Disable active text color</string>
+    <string name="disable_inactive_text_color">Disable inactive text color</string>
+    <string name="disable_active_tick_color">Disable active tick color</string>
+    <string name="disable_inactive_tick_color">Disable inactive tick color</string>
+    <string name="marker_color">Marker color</string>
+    <string name="disable_marker_color">Disable Marker color</string>
+    <string name="tick_Size">Tick size</string>
     <string name="text_Size">Text size</string>
     <string name="bar_height">Bar height</string>
     <string name="text_top_margin">Distance between bars and text</string>
     <string name="is_vibrate">Enable vibration when value changes</string>
-    <string name="show_pointer">Show pointer</string>
+    <string name="show_tick">Show tick</string>
     <string name="show_text">Show X labels</string>
+    <string name="enable">enable</string>
+    <string name="value">Value</string>
+    <string name="detail_value">Detail value</string>
 </resources>
