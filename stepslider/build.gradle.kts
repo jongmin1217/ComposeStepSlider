@@ -43,13 +43,43 @@ android {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
 
-    publishing{
-        singleVariant("release"){
-            withSourcesJar()
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = JavaVersion.VERSION_11.name
+        targetCompatibility = JavaVersion.VERSION_11.name
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "11"
+        }
+    }
+
+}
+
+subprojects {
+    plugins.withType<com.android.build.gradle.BasePlugin> {
+        android {
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+
+            kotlinOptions {
+                jvmTarget = "11"
+            }
         }
     }
 }
 
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.github.jongmin1217"
+            artifactId = "composestepslider"
+            version = "1.0.0"
+        }
+    }
+}
 
 
 dependencies {
@@ -61,20 +91,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.bundles.compose)
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.bellminp.composestepslider"
-            artifactId = "composestepslider"
-            version = "1.0.0"
-
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
-    }
 }
 
 //
