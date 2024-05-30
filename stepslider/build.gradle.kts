@@ -63,30 +63,44 @@ dependencies {
     implementation(libs.bundles.compose)
 }
 
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.bellminp.composestepslider"
+            artifactId = "composestepslider"
+            version = "1.0.0"
 
-publishing{
-    publications{
-        withType<MavenPublication>{
-            pom {
-                name.set("ComposeStepSlider")
-                description.set("Compose StepSlider")
-
-                url.set("https://github.com/jongmin1217/ComposeStepSlider")
-                issueManagement {
-                    system.set("Github")
-                    url.set("https://github.com/jongmin1217/ComposeStepSlider/issues")
-                }
-                scm {
-                    connection.set("https://github.com/jongmin1217/ComposeStepSlider.git")
-                    url.set("https://github.com/jongmin1217/ComposeStepSlider")
-                }
-                developers {
-                    developer {
-                        name.set("bellminp")
-                        email.set("syj408886@gmail.com")
-                    }
-                }
+            afterEvaluate {
+                from(components["release"])
             }
         }
     }
 }
+
+//
+//publishing{
+//    publications{
+//        withType<MavenPublication>{
+//            pom {
+//                name.set("ComposeStepSlider")
+//                description.set("Compose StepSlider")
+//
+//                url.set("https://github.com/jongmin1217/ComposeStepSlider")
+//                issueManagement {
+//                    system.set("Github")
+//                    url.set("https://github.com/jongmin1217/ComposeStepSlider/issues")
+//                }
+//                scm {
+//                    connection.set("https://github.com/jongmin1217/ComposeStepSlider.git")
+//                    url.set("https://github.com/jongmin1217/ComposeStepSlider")
+//                }
+//                developers {
+//                    developer {
+//                        name.set("bellminp")
+//                        email.set("syj408886@gmail.com")
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
