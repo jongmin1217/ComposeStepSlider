@@ -4,6 +4,10 @@ plugins {
     id("maven-publish")
 }
 
+
+group = "com.bellminp.composestepslider"
+version = "1.0.0"
+
 android {
     namespace = "com.bellminp.stepslider"
     compileSdk = 34
@@ -39,12 +43,13 @@ android {
     }
 }
 
-group = "com.bellminp.composestepslider"
-version = "1.0.0"
 
 val javadocJar = tasks.register("javadocJar", Jar::class.java) {
     archiveClassifier.set("javadoc")
 }
+
+val myAttribute = Attribute.of("my.attribute.name", String::class.java)
+val myUsage = Attribute.of("my.usage.attribute", Usage::class.java)
 
 publishing{
     publications{
@@ -70,6 +75,22 @@ publishing{
                     }
                 }
             }
+        }
+    }
+}
+
+dependencies.attributesSchema{
+    attribute(myAttribute)
+    attribute(myUsage)
+}
+
+configurations {
+    create("myConfiguration") {
+        attributes {
+            attribute(myAttribute, "my-value")
+        }
+        attributes {
+            attribute(myUsage, project.objects.named(Usage::class.java, "my-value"))
         }
     }
 }
