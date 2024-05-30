@@ -32,6 +32,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -41,20 +42,31 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+
+    publishing{
+        singleVariant("release"){
+            withSourcesJar()
+        }
+    }
 }
 
 
-val javadocJar = tasks.register("javadocJar", Jar::class.java) {
-    archiveClassifier.set("javadoc")
+
+dependencies {
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.bundles.compose)
 }
 
-val myAttribute = Attribute.of("my.attribute.name", String::class.java)
-val myUsage = Attribute.of("my.usage.attribute", Usage::class.java)
 
 publishing{
     publications{
         withType<MavenPublication>{
-            artifact(javadocJar)
             pom {
                 name.set("ComposeStepSlider")
                 description.set("Compose StepSlider")
@@ -77,31 +89,4 @@ publishing{
             }
         }
     }
-}
-
-dependencies.attributesSchema{
-    attribute(myAttribute)
-    attribute(myUsage)
-}
-
-configurations {
-    create("myConfiguration") {
-        attributes {
-            attribute(myAttribute, "my-value")
-        }
-        attributes {
-            attribute(myUsage, project.objects.named(Usage::class.java, "my-value"))
-        }
-    }
-}
-
-dependencies {
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.bundles.compose)
 }
