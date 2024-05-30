@@ -39,6 +39,9 @@ android {
     }
 }
 
+group = "com.bellminp.composestepslider"
+version = "1.0.0"
+
 val javadocJar = tasks.register("javadocJar", Jar::class.java) {
     archiveClassifier.set("javadoc")
 }
