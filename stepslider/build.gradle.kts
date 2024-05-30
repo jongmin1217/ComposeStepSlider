@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -35,6 +36,38 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
+    }
+}
+
+val javadocJar = tasks.register("javadocJar", Jar::class.java) {
+    archiveClassifier.set("javadoc")
+}
+
+publishing{
+    publications{
+        withType<MavenPublication>{
+            artifact(javadocJar)
+            pom {
+                name.set("ComposeStepSlider")
+                description.set("Compose StepSlider")
+
+                url.set("https://github.com/jongmin1217/ComposeStepSlider")
+                issueManagement {
+                    system.set("Github")
+                    url.set("https://github.com/jongmin1217/ComposeStepSlider/issues")
+                }
+                scm {
+                    connection.set("https://github.com/jongmin1217/ComposeStepSlider.git")
+                    url.set("https://github.com/jongmin1217/ComposeStepSlider")
+                }
+                developers {
+                    developer {
+                        name.set("bellminp")
+                        email.set("syj408886@gmail.com")
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -12,7 +12,7 @@ appcompat = "1.6.1"
 material = "1.12.0"
 compose = "1.6.7"
 material3 = "1.2.1"
-coil = "2.5.0"
+maven-gradle = "2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,7 +41,6 @@ compose-foundation = { group = "androidx.compose.foundation", name = "foundation
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose"}
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3"}
 compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "compose"}
-coil = { module = "io.coil-kt:coil-compose", version.ref = "coil"}
 
 [bundles]
 compose = ["compose-ui","compose-ui-tooling","compose-ui-viewbinding","compose-ui-util","compose-runtime-livedata","compose-animation","compose-foundation","compose-material","compose-material3","compose-runtime"]
@@ -50,4 +49,5 @@ compose = ["compose-ui","compose-ui-tooling","compose-ui-viewbinding","compose-u
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-maven-gradle = { id = "com.github.dcendents.android-maven", version.ref = "maven-gradle" }
 
