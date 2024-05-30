@@ -4,10 +4,6 @@ plugins {
     id("maven-publish")
 }
 
-
-group = "com.bellminp.composestepslider"
-version = "1.0.0"
-
 android {
     namespace = "com.bellminp.stepslider"
     compileSdk = 34
@@ -34,7 +30,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = libs.versions.jvmTarget.get()
     }
     buildFeatures {
         compose = true
@@ -42,45 +38,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
-
-    tasks.withType<JavaCompile> {
-        sourceCompatibility = JavaVersion.VERSION_11.name
-        targetCompatibility = JavaVersion.VERSION_11.name
-    }
-
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-
 }
-
-subprojects {
-    plugins.withType<com.android.build.gradle.BasePlugin> {
-        android {
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_11
-                targetCompatibility = JavaVersion.VERSION_11
-            }
-
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.github.jongmin1217"
-            artifactId = "composestepslider"
-            version = "1.0.0"
-        }
-    }
-}
-
 
 dependencies {
 
@@ -93,30 +51,47 @@ dependencies {
     implementation(libs.bundles.compose)
 }
 
-//
-//publishing{
-//    publications{
-//        withType<MavenPublication>{
-//            pom {
-//                name.set("ComposeStepSlider")
-//                description.set("Compose StepSlider")
-//
-//                url.set("https://github.com/jongmin1217/ComposeStepSlider")
-//                issueManagement {
-//                    system.set("Github")
-//                    url.set("https://github.com/jongmin1217/ComposeStepSlider/issues")
-//                }
-//                scm {
-//                    connection.set("https://github.com/jongmin1217/ComposeStepSlider.git")
-//                    url.set("https://github.com/jongmin1217/ComposeStepSlider")
-//                }
-//                developers {
-//                    developer {
-//                        name.set("bellminp")
-//                        email.set("syj408886@gmail.com")
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = "com.github.jongmin1217"
+                artifactId = "ComposeStepSlider"
+                version = "1.0.0"
+
+                pom {
+                    name.set("ComposeStepSlider")
+                    description.set("Compose Step Slider")
+                    url.set("https://github.com/jongmin1217/ComposeStepSlider")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("jongmin1217")
+                            name.set("Jongmin")
+                            email.set("syj408886@gmail.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:github.com/jongmin1217/ComposeStepSlider.git")
+                        developerConnection.set("scm:git:ssh://github.com/jongmin1217/ComposeStepSlider.git")
+                        url.set("https://github.com/jongmin1217/ComposeStepSlider")
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "jitpack"
+                url = uri("https://jitpack.io")
+            }
+        }
+    }
+}

@@ -4,4 +4,5 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.android.maven.gradle) apply false
+    kotlin("jvm") version libs.versions.kotlin.get() apply false
 }
