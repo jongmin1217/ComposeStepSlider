@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -269,14 +271,19 @@ fun SampleScreen(modifier: Modifier = Modifier) {
 
         LazyHorizontalGrid(
             rows = GridCells.Fixed(2),
-            modifier = Modifier.height(160.dp).padding(horizontal = 20.dp).padding(top = 40.dp)
+            modifier = Modifier
+                .height(160.dp)
+                .padding(horizontal = 20.dp)
+                .padding(top = 40.dp)
         ) {
             items(
                 items = switchList,
                 key = { it.first },
-                itemContent = { item : Pair<SettingType,Boolean> ->
+                itemContent = { item: Pair<SettingType, Boolean> ->
                     Row(
-                        modifier = Modifier.height(60.dp).padding(start = 20.dp)
+                        modifier = Modifier
+                            .height(60.dp)
+                            .padding(start = 20.dp)
                     ) {
                         Text(
                             text = stringResource(id = item.first.titleResId),
@@ -284,13 +291,15 @@ fun SampleScreen(modifier: Modifier = Modifier) {
                                 fontSize = 15.dp.textSp,
                                 fontWeight = W700
                             ),
-                            modifier = Modifier.align(Alignment.CenterVertically).width(100.dp)
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .width(100.dp)
                         )
 
                         Switch(
                             checked = item.second,
                             onCheckedChange = {
-                                when(item.first){
+                                when (item.first) {
                                     SettingType.TEXT -> showText = it
                                     SettingType.TICK -> showTick = it
                                     SettingType.VIBRATOR -> isVibrate = it
@@ -464,7 +473,7 @@ fun SettingColorContent(
                         .border(
                             width = 3.dp,
                             color = if (isSelect) {
-                                if(colorList[it] == Color.Red) Color.Black
+                                if (colorList[it] == Color.Red) Color.Black
                                 else Color.Red
                             } else Color.Transparent
                         )

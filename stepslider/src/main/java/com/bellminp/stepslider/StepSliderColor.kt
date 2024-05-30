@@ -15,7 +15,7 @@ sealed class ColorOrBrush {
 @Immutable
 class StepSliderColor(
     val activeTrackColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.Red),
-    val inactiveTrackColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.Gray),
+    val inactiveTrackColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.LightGray),
     val activeTickColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.White),
     val inactiveTickColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.White),
     val disabledActiveTrackColor: ColorOrBrush = ColorOrBrush.SingleColor(Color.Gray),

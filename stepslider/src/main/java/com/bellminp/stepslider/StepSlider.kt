@@ -53,9 +53,9 @@ fun StepSlider(
     modifier: Modifier = Modifier,
     value: Int,
     xLabels: List<String> = List(5){"$it"},
-    color: StepSliderColor,
-    textStyle: StepSliderTextStyle,
-    enabled: Boolean,
+    color: StepSliderColor = StepSliderColor(),
+    textStyle: StepSliderTextStyle = StepSliderTextStyle(),
+    enabled: Boolean = true,
     tickSize: Dp = 7.dp,
     barHeight: Dp = 8.dp,
     textTopMargin: Dp = 5.dp,
@@ -89,12 +89,14 @@ fun StepSlider(
 
     val xLabelSize by rememberUpdatedState(newValue = xLabels.size - 1)
     val dragEnable by rememberUpdatedState(newValue = enabled)
-
+    val viewHeight by rememberUpdatedState(newValue = max((markerHeight / 2).dp, barHeight / 2))
+    val textOffset by rememberUpdatedState(newValue = max(markerHeight, barHeight.value.toInt()))
 
     LaunchedEffect(xLabelSize) {
         offsetX.snapTo(endOffset / xLabelSize * value)
         if (value > xLabelSize) {
             onValueChange(xLabelSize)
+            onDetailValueChange?.invoke(xLabelSize.toFloat())
         }
     }
 
@@ -103,11 +105,11 @@ fun StepSlider(
         screenWidth,
         endOffset
     ) {
-        offsetX.snapTo(endOffset / (xLabels.size - 1) * value)
+        offsetX.snapTo(endOffset / xLabelSize * value)
     }
 
     LaunchedEffect(offsetX.value) {
-        val interval = endOffset / (xLabels.size - 1)
+        val interval = endOffset / xLabelSize
         val detailValue = offsetX.value / interval
         onDetailValueChange?.invoke(detailValue)
 
@@ -122,7 +124,7 @@ fun StepSlider(
             Modifier
                 .pointerInput(Unit) {
                     detectTapGestures {
-                        if(dragEnable){
+                        if (dragEnable) {
                             scope.launch {
                                 offsetX.animateTo(
                                     calculateNewOffset(
@@ -147,10 +149,7 @@ fun StepSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(
-                    (max(
-                        markerHeight,
-                        barHeight.value.toInt()
-                    ) + (if (showText) textHeight
+                    (textOffset + (if (showText) textHeight
                         .toFloat()
                         .pixelToDp(context) + textTopMargin.value else 0f)).dp
                 )
@@ -158,14 +157,15 @@ fun StepSlider(
                 .align(Alignment.TopCenter)
                 .background(Color.Transparent)
         ) {
+            val xLabelOffsets = List(xLabels.size){ ((size.width / xLabelSize) * it) }
 
             drawSliderList(
                 colorOrBrush = color.trackColor(
                     enabled = enabled,
                     active = false
                 ),
-                start = Offset(0f, max((markerHeight / 2).dp, barHeight / 2).toPx()),
-                end = Offset(size.width, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                start = Offset(0f, viewHeight.toPx()),
+                end = Offset(size.width, viewHeight.toPx()),
                 strokeWidth = barHeight.toPx()
             )
 
@@ -174,21 +174,21 @@ fun StepSlider(
                     enabled = enabled,
                     active = true
                 ),
-                start = Offset(0f, max((markerHeight / 2).dp, barHeight / 2).toPx()),
-                end = Offset(offsetX.value, max((markerHeight / 2).dp, barHeight / 2).toPx()),
+                start = Offset(0f, viewHeight.toPx()),
+                end = Offset(offsetX.value, viewHeight.toPx()),
                 strokeWidth = barHeight.toPx()
             )
 
             if (showTick) {
                 for (i in xLabels.indices) {
                     val start = Offset(
-                        ((size.width / (xLabels.size - 1)) * i),
-                        max((markerHeight / 2).dp, barHeight / 2).toPx()
+                        xLabelOffsets[i],
+                        viewHeight.toPx()
                     )
 
                     val end = Offset(
-                        ((size.width / (xLabels.size - 1)) * i),
-                        max((markerHeight / 2).dp, barHeight / 2).toPx()
+                        xLabelOffsets[i],
+                        viewHeight.toPx()
                     )
 
                     val strokeWidth = tickSize.toPx()
@@ -222,11 +222,8 @@ fun StepSlider(
                         drawText(
                             textLayoutResult = textLayoutResult,
                             topLeft = Offset(
-                                ((size.width / (xLabels.size - 1)) * i) - (textLayoutResult.size.width / 2),
-                                ((max(
-                                    markerHeight,
-                                    barHeight.value.toInt()
-                                ) + textTopMargin.value).toInt().dpToPixel(context))
+                                xLabelOffsets[i] - (textLayoutResult.size.width / 2),
+                                ((textOffset + textTopMargin.value).toInt().dpToPixel(context))
                             )
                         )
                     } catch (_: IllegalArgumentException) {
@@ -249,7 +246,7 @@ fun StepSlider(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { _, dragAmount ->
-                        if(dragEnable){
+                        if (dragEnable) {
                             scope.launch {
                                 offsetX.snapTo(offsetX.value + dragAmount.x)
                             }
@@ -257,7 +254,7 @@ fun StepSlider(
 
                     },
                     onDragEnd = {
-                        if(dragEnable){
+                        if (dragEnable) {
                             scope.launch {
                                 offsetX.animateTo(
                                     calculateNewOffset(
