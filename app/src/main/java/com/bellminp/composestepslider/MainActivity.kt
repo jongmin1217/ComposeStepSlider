@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -96,11 +94,11 @@ fun SampleScreen(modifier: Modifier = Modifier) {
         var barHeight by remember { mutableStateOf(8.dp) }
         var textTopMargin by remember { mutableStateOf(3.dp) }
         var activeTrackColor by remember { mutableStateOf(Color.Red) }
-        var inactiveTrackColor by remember { mutableStateOf(Color.LightGray) }
+        var inactiveTrackColor by remember { mutableStateOf(Color.Gray) }
         var activeTextColor by remember { mutableStateOf(Color.Red) }
         var inactiveTextColor by remember { mutableStateOf(Color.Black) }
-        var activeTickColor by remember { mutableStateOf(Color.Red) }
-        var inactiveTickColor by remember { mutableStateOf(Color.White) }
+        var activeTickColor by remember { mutableStateOf(Color.White) }
+        var inactiveTickColor by remember { mutableStateOf(Color.Red) }
         var disabledActiveTrackColor by remember { mutableStateOf(Color.Gray) }
         var disabledInactiveTrackColor by remember { mutableStateOf(Color.LightGray) }
         var disabledActiveTextColor by remember { mutableStateOf(Color.Gray) }
@@ -157,15 +155,7 @@ fun SampleScreen(modifier: Modifier = Modifier) {
                 .padding(top = 40.dp),
             xLabels = xLabels,
             color = StepSliderColor(
-                activeTrackColor = ColorOrBrush.GradientBrush(
-                    Brush.horizontalGradient(
-                        listOf(
-                            Color.White,
-                            Color(0xffFFB5BA),
-                            Color(0xffFF0015)
-                        )
-                    )
-                ),
+                activeTrackColor = ColorOrBrush.SingleColor(activeTrackColor),
                 inactiveTrackColor = ColorOrBrush.SingleColor(inactiveTrackColor),
                 activeTickColor = ColorOrBrush.SingleColor(activeTickColor),
                 inactiveTickColor = ColorOrBrush.SingleColor(inactiveTickColor),
@@ -327,11 +317,13 @@ fun SampleScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun Marker(color: Color) {
-    Image(
-        painter = painterResource(id = R.drawable.img_icon_dog),
-        contentDescription = "",
-        modifier = Modifier.size(60.dp)
-    )
+    Canvas(modifier = Modifier.size(30.dp), onDraw = {
+        val size = 30.dp.toPx()
+        drawCircle(
+            color = color,
+            radius = size / 2f
+        )
+    })
 }
 
 @Composable
