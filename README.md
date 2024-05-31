@@ -1,6 +1,8 @@
 # StepSlider
 
 StepSlider is a customizable slider component for Jetpack Compose in Android, designed to allow users to select values within a predefined range with discrete steps.  
+
+<img src="https://github.com/jongmin1217/ComposeStepSlider/blob/main/readme/sample.gif"></img>
   
     
 ### Features
